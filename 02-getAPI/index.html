@@ -43,10 +43,12 @@
 		<div class="row">
 			<div class="col-md-6 offset-md-3">
 				<div class="text-center">
-					<input v-model="amount" type="text" placeholder="Amount" class="form-control my-5">
+					<input @keypress="numberOnly" v-model="amount" type="text" placeholder="Amount" class="form-control my-5">
 				</div>
 				<div class="text-center">
-					<button @click="convertCurrency()" class="btn btn-lg btn-primary">Convert</button>
+					<button :disabled="disabled" @click="convertCurrency()" class="btn btn-lg btn-primary">
+						{{ loading ? 'Converting...' : 'Convert' }}
+					</button>
 				</div>
 			</div>
 		</div>
@@ -65,10 +67,11 @@ new Vue({
 	el: '#app',
 	data: {
 		currencies : {},
-		amount: null,
+		amount: 0,
 		from: 'USD',
 		to: 'IDR',
-		result: 0
+		result: 0,
+		loading: false
 	},
 	mounted() {
 		this.getCurrencies();
@@ -78,9 +81,11 @@ new Vue({
 			return Object.values(this.currencies);
 		},
 		calculateResult() {
-
 			let fxNumber = (Number(this.amount) * this.result);
 			return fxNumber.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+		},
+		disabled() {
+			return this.amount === 0 || !this.amount || this.loading;
 		}
 	},
 	methods: {
@@ -103,14 +108,26 @@ new Vue({
 		convertCurrency() {
 
 			const key = this.from +'_'+ this.to;
-			
+			this.loading = true;
+
 			axios.get('https://free.currencyconverterapi.com/api/v6/convert?q='+ key +'&apiKey=sample-api-key')
 			.then((response) => {
 
+				this.loading = false;
 				this.result = response.data.results[key].val
 				
 			});
+		},
+		numberOnly: function(event) {
+
+			let keyCode = (event.keyCode ? event.keyCode : event.which);
+			// 46 : for DEL
+			if ((keyCode < 48 || keyCode > 57) && keyCode !== 46) {
+			  event.preventDefault();
+			}
+
 		}
+
 	}
 })
 </script>
