@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	
+	<title>Vuejs2018 - Counter</title>
+	
+</head>
+<body>
+
+<div id="app" align="center">
+	
+	<h1>{{ count }}</h1>
+	
+	<button @click="reduceCounter"> - </button>
+	<button v-on:click="oddCounter"> + </button>
+
+	<p v-if="isEventNumber">The current count is even</p>
+	<p v-else>The current count is odd</p>
+	
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.6/dist/vue.js"></script>
+<script>
+new Vue({
+	el: '#app',
+	data: {
+		count : 0
+	},
+	methods: {	
+		reduceCounter() {
+			this.count--
+		},
+
+		oddCounter() {
+			this.count++
+		}
+	},
+	computed: {
+		
+		isEventNumber() {
+			return this.count % 2 === 0
+		}
+	},
+	watch: {
+		count() {
+			const ids = document.querySelector("#app");
+			const btnMinus = ids.getElementsByTagName("button")[0];
+			if(this.count === 0){
+				btnMinus.disabled = true;
+			}
+			else {
+				btnMinus.disabled = false;
+			}
+		}
+	}
+})
+</script>
+</body>
+</html>

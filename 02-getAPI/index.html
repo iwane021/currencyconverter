@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+	<title>Vuejs2018 - Currency Converter</title>
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">
+	<style type="text/css">
+		* { border-radius: 0 !important;  }
+		body { 
+			background-color: #E7F7F9;  
+			font-family: 'Poppins', sans-serif;
+		}
+	</style>
+</head>
+<body>
+
+<div id="app">
+	<div class="container my-5">
+		<div class="row">
+			<div class="col-md-6">
+				<label>From</label>
+				<select v-model="from" name="" id="" class="form-control">
+					<option :value="currency.id" v-for="currency in formattedCurrencies ">
+						{{ currency.currencyName }}
+					</option>
+				</select>
+			</div>
+			<div class="col-md-6">
+				<label>To</label>
+				<select v-model="to" name="" id="" class="form-control">
+					<option :value="currency.id" v-for="currency in formattedCurrencies ">
+						{{ currency.currencyName }}
+					</option>
+				</select>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6 offset-md-3">
+				<div class="text-center">
+					<input v-model="amount" type="text" placeholder="Amount" class="form-control my-5">
+				</div>
+				<div class="text-center">
+					<button @click="convertCurrency()" class="btn btn-lg btn-primary">Convert</button>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6 offset-md-3">
+				<h1 class="text-center display-2 mt-5">{{ calculateResult }}</h1>
+			</div>
+		</div>
+	</div>	
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.6/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.10.0/axios.min.js"></script>
+<script>
+new Vue({
+	el: '#app',
+	data: {
+		currencies : {},
+		amount: null,
+		from: 'USD',
+		to: 'IDR',
+		result: 0
+	},
+	mounted() {
+		this.getCurrencies();
+	},
+	computed: {
+		formattedCurrencies() {
+			return Object.values(this.currencies);
+		},
+		calculateResult() {
+
+			let fxNumber = (Number(this.amount) * this.result);
+			return fxNumber.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+		}
+	},
+	methods: {
+		getCurrencies() {
+			const currencies = localStorage.getItem('currencies')
+
+			if (currencies) {
+				this.currencies = JSON.parse(currencies);
+
+				return;
+			}
+
+			axios.get('https://free.currencyconverterapi.com/api/v6/currencies?apiKey=sample-api-key')
+			.then((response) => {
+
+				this.currencies = response.data.results;
+				localStorage.setItem('currencies', JSON.stringify(response.data.results))
+			});
+		},
+		convertCurrency() {
+
+			const key = this.from +'_'+ this.to;
+			
+			axios.get('https://free.currencyconverterapi.com/api/v6/convert?q='+ key +'&apiKey=sample-api-key')
+			.then((response) => {
+
+				this.result = response.data.results[key].val
+				
+			});
+		}
+	}
+})
+</script>
+</body>
+</html>
